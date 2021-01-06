@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> <!-- LINKED JS in index.js-->
 <html>
     <head>    
         <title>APEX CAPSTONE PROJECT</title>
@@ -83,12 +83,12 @@
                         <option value="AAPL">Apple</option>
                         <option value="AMZN">Amazon</option>
                         <option value="FB">Facebook</option>
-                        <option value="GOOG">Google</option>
                         <option value="MSFT">Microsoft</option>
                         <option value="SPY">SPY</option>
                     </select>
                     <label for="stock">Pick Stock</label></p>
                     <p>check box and select the stock ticker to see data as if you invested 10yrs ago</p>
+                    <p>data is taken from the highest price in January of each year, accounting for stock splits</p>
                 </div>
             </div>
             </form>
@@ -103,176 +103,7 @@
             </div>
         </div> <!--row #2 close-->
         
-        <script>
-function createData(startval) {    // returns array of x y coords in format [[x1,y1], [x2, y2], [x3, y3] ... ] starting at x=0
-    var mydataset = []
-    var i = 0
-    while (i < 31) {
-        var amt = Math.round(startval*Math.pow(1.136,i))
-        mydataset[i] = [i, amt]
-        i++
-    }
-    return mydataset
-}
-
-function makeChart(dataset) { // only used in the inital creation of global chart myChart with a blank dataset. Cannot be called again while myChart exists
-    var options = {
-        chart: {
-            type:'line',
-            toolbar : {
-                show: false
-            }
-        },
-        tooltip: {
-            enabled : false,
-            shared : false
-        },
-        series: [{
-            name : 'Returns',
-            data : dataset
-        }],
-        xaxis: {
-            type : 'category',
-            title : {
-                text : 'Years Later',
-                style: {
-                    fontSize:  '14px',
-                    fontWeight:  'bold',
-                    fontFamily:  'Calibri',
-                    color:  '#263238'
-                    }
-            }
-        },
-        yaxis: {
-            title : {
-                text : 'Estimated Value (in $)',
-                style: {
-                    fontSize:  '14px',
-                    fontWeight:  'bold',
-                    fontFamily:  'Calibri',
-                    color:  '#263238'
-                }
-            }
-        }
-        }
-    var chart = new ApexCharts(document.querySelector("#chart"), options) // no clue how this works btw but it links to the chart div
-    chart.render();
-    return chart
-} 
-
-function userGivenChart() { // takes in the user input from customAmt textbox, runs createData to generate the xy points, updates the myChart dataset
-    var newamt = document.getElementById("customAmt").value;
-    var newdataset = createData(newamt)
-    myChart.updateSeries([{
-    name : 'Returns',
-    data : newdataset
-    }])
-    let infoForTable = [
-        [newdataset[0][0], newdataset[0][1]], [newdataset[1][0], newdataset[1][1]],[newdataset[3][0], newdataset[3][1]], [newdataset[5][0], newdataset[5][1]], [newdataset[7][0], 
-        newdataset[7][1]], [newdataset[10][0], newdataset[10][1]], [newdataset[15][0], newdataset[15][1]], [newdataset[20][0], newdataset[20][1]], [newdataset[25][0], 
-        newdataset[25][1]], [newdataset[30][0], newdataset[30][1]]
-    ]
-    populateTable(infoForTable)
-}
-
-function histTenYearReturn() { //ToDo -- Switch to array that fits backTenStock()
-    var newamt = document.getElementById("customAmt").value;
-    var histdataset = [[2011, newamt], [2021, (newamt * 2.94)]]
-    myChart.updateSeries([{
-        data : histdataset
-    }])
-}
-
-function backTenStock(multiplierArray) {
-    var newamt = document.getElementById('customAmt').value
-    //var multipliers = [1, 1.188, 1.05, 1.5, 0.86, 1.15, 1.5, 0.93, 1.93, 1.63]
-    var i = 0
-    var year = 2012
-    var newdataset = []
-    while (i < 10) {
-      newamt = Math.round((multiplierArray[i] * newamt))
-      newdataset[i] = [year, newamt]
-      year++
-      i++
-    }
-    myChart.updateSeries([{
-        data : newdataset
-    }])
-    populateTable(newdataset)
-}
-function populateTable(contentsArray) { //array must be 10 XY pairings in format array = [[x0, y0], [x1, y1] ...]
-    let table = document.getElementById('tableBody')
-    let rowOne = document.createElement("tr")
-    let i = 0
-    let xheader = document.createElement("th")
-    let xhText = document.createTextNode("Year")
-    xheader.appendChild(xhText)
-    rowOne.appendChild(xheader)
-    while (i < 10) {
-        let newCell = document.createElement("td")
-        let newText = document.createTextNode((contentsArray[i][0]).toString())
-        newCell.appendChild(newText)
-        rowOne.appendChild(newCell)
-        i++
-    }
-    table.appendChild(rowOne)
-    let rowTwo = document.createElement("tr")
-    let yheader = document.createElement("th")
-    let yhText = document.createTextNode("Value ($)")
-    yheader.appendChild(yhText)
-    rowTwo.appendChild(yheader)
-    let c = 0
-    while (c < 10) {
-        let newCell = document.createElement("td")
-        let newText = document.createTextNode((contentsArray[c][1]).toString())
-        newCell.appendChild(newText)
-        rowTwo.appendChild(newCell)
-        c++
-        //uncomment to log info to check if table data is consistent with the array
-        //console.log(contentsArray[c][1])
-        //console.log((contentsArray[c][1]).toString())
-    }
-    table.appendChild(rowTwo)
-}
-function clearTable() {
-    let node = document.getElementById("tableBody");
-    while (node.hasChildNodes()) {
-        console.log("removing " + node.lastChild + "from" + node.id)
-        node.removeChild(node.lastChild);
-    }
-}
-function whenFormisSubmit() {
-    clearTable()
-    var histdatabox = document.getElementById('histDataSwitch')
-    var stockselector = document.getElementById('stock')
-    selectedStock = stockselector[stockselector.selectedIndex].value
-    if(histdatabox.checked) {
-        switch(selectedStock) {
-            case "AAPL":
-                backTenStock(appleMultiplierList);
-                break;
-            case "SPY":
-                histTenYearReturn();
-                break;
-            case "MSFT":
-                backTenStock(msftMultiplierList);
-                break;
-            default:
-                console.log('selectionError');
-        }
-    } else {
-        userGivenChart()
-    }
-}
-
-
-var msftMultiplierList = [1, 0.933, 1.32, 1.27, 1.17, 1.18, 1.46, 1.13, 1.63, 1.28]
-var appleMultiplierList = [1, 1.188, 1.05, 1.5, 0.86, 1.15, 1.5, 0.93, 1.93, 1.63]
-var myChart = makeChart([]) // initializes a blank chart "myChart", global variable
-
-//var testArray = [[1,1], [2, 2], [3, 3], [4, 4], [5, 5], [6, 6], [7, 7], [8, 8], [9, 9], [10, 10]]
-//populateTable(testArray)
-        </script>
+        <script src="index.js"></script>
         
         </div> <!--Overall container close-->
     </body>
